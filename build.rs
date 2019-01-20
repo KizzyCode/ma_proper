@@ -20,6 +20,7 @@ fn main() {
 		.file("helpers/helpers.c")
 		.define(secure_memset, None)
 		.static_flag(true)
+		.flag("-std=c11")
 		.compile("helpers");
 	
 	// Link the library
