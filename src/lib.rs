@@ -83,7 +83,8 @@ impl Metadata {
 		let len: [u8; USIZE_LEN] = allocated.to_be_bytes();
 		let crc64: [u8; 8] = Self::crc64(&len).to_be_bytes();
 		
-		// Copy the length and add
+		// Zero the memory and copy the length and CRC
+		erase_ptr(ptr, META_LEN);
 		ptr::copy(len.as_ptr(), ptr, USIZE_LEN);
 		ptr::copy(crc64.as_ptr(), ptr.add(META_LEN - 8), 8);
 	}
