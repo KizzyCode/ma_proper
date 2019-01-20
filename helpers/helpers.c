@@ -1,17 +1,18 @@
 // Include `stdlib.h` for `size_t` and `stdio.h` for `fprintf`
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 
 // Function-dependent includes
-#if defined(HAS_MEMSET_S)
+#if defined(USE_MEMSET_S)
 	#define __STDC_WANT_LIB_EXT1__ 1
 	#include <string.h>
-#elif defined(HAS_SECUREZEROMEMORY)
+#elif defined(USE_SECUREZEROMEMORY)
 	#include <windows.h>
 	#include <wincrypt.h>
-#elif defined(HAS_EXPLICIT_BZERO)
+#elif defined(USE_EXPLICIT_BZERO)
 	#include <strings.h>
-#elif defined(HAS_EXPLICIT_MEMSET)
+#elif defined(USE_EXPLICIT_MEMSET)
 	#include <string.h>
 #endif
 
@@ -42,15 +43,19 @@ void die(char const* message) {
 /// \param ptr A pointer to the memory to erase
 /// \param len The length of the memory to erase
 void ma_proper_memzero(uint8_t* const ptr, const size_t len) {
-	#if defined(HAS_MEMSET_S)
+	#if defined(USE_MEMSET_S)
 		if (len != 0 && memset_s(ptr, (rsize_t)len, 0, (rsize_t)len) != 0) die("`memset_s` failed");
-	#elif defined(HAS_SECUREZEROMEMORY)
+	#elif defined(USE_SECUREZEROMEMORY)
 		SecureZeroMemory(ptr, len);
-	#elif defined(HAS_EXPLICIT_BZERO)
+	#elif defined(USE_EXPLICIT_BZERO)
 		explicit_bzero(ptr, len);
-	#elif defined(HAS_EXPLICIT_MEMSET)
+	#elif defined(USE_EXPLICIT_MEMSET)
 		explicit_memset(ptr, 0, len);
+	#elif defined(USE_VOLATILE_POINTERS)
+		#warning "No secure `memset` alternative known; using volatile poiners"
+		volatile uint8_t* volatile ptr_ = (volatile uint8_t* volatile)ptr;
+		for (size_t i = 0; i < len; i++) ptr_[i] = 0x00;
 	#else
-		#error "No secure `memset`-variant available"
+		#error "No secure memset implementation specified"
 	#endif
 }
