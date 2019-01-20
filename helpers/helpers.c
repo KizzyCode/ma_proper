@@ -45,16 +45,12 @@ void die(char const* message) {
 /// \param len The length of the memory to erase
 void ma_proper_memzero(uint8_t* const ptr, const size_t len) {
 	#if defined(USE_MEMSET_S)
-		#pragma message("Using `memset_s`")
 		if (len != 0 && memset_s(ptr, (rsize_t)len, 0, (rsize_t)len) != 0) die("`memset_s` failed");
 	#elif defined(USE_SECUREZEROMEMORY)
-		#pragma message("Using `SecureZeroMemory`")
 		SecureZeroMemory(ptr, len);
 	#elif defined(USE_EXPLICIT_BZERO)
-		#pragma message("Using `explicit_bzero`")
 		explicit_bzero(ptr, len);
 	#elif defined(USE_EXPLICIT_MEMSET)
-		#pragma message("Using `explicit_memset`")
 		explicit_memset(ptr, 0, len);
 	#elif defined(USE_VOLATILE_POINTERS)
 		#warning "No secure `memset` alternative known; using volatile poiners"
