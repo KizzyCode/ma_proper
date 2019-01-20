@@ -19,9 +19,9 @@ fn main() {
 	cc::Build::new()
 		.file("helpers/helpers.c")
 		.define(secure_memset, None)
+		.static_flag(true)
 		.compile("helpers");
 	
 	// Link the library
-	println!("cargo:rustc-link-search=native={}", "helpers");
 	println!("cargo:rustc-link-lib=static=helpers");
 }
