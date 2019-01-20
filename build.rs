@@ -8,7 +8,7 @@ fn main() {
 			=> "USE_MEMSET_S",
 		cfg!(target_os = "windows")
 			=> "USE_SECUREZEROMEMORY",
-		cfg!(target_os = "linux") | cfg!(target_os = "freebsd") | cfg!(target_os = "openbsd")
+		cfg!(target_os = "freebsd") | cfg!(target_os = "openbsd")
 			=> "USE_EXPLICIT_BZERO",
 		cfg!(target_os = "netbsd")
 			=> "USE_EXPLICIT_MEMSET",
