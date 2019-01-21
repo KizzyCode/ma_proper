@@ -12,7 +12,10 @@ fn main() {
 			=> "USE_EXPLICIT_BZERO",
 		cfg!(target_os = "netbsd")
 			=> "USE_EXPLICIT_MEMSET",
-		_ => "USE_VOLATILE_POINTERS"
+		
+		// Check if we should use the fallback with volatile pointers
+		_ if cfg!(feature = "volatile_fallback") => "USE_VOLATILE_POINTERS",
+		_ => panic!("No secure memset implementation known")
 	};
 	
 	// Compile the library

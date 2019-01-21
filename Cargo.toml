@@ -19,6 +19,7 @@ appveyor = { repository = "KizzyCode/ma_proper" }
 [features]
 default = []
 trace = []
+volatile_fallback = []
 
 
 [profile.release]
