@@ -11,7 +11,7 @@ compiler:
   - clang
 
 script:
-  - cargo test --verbose
-  - cargo test --verbose --release
-  - cargo test --verbose --features "trace"
-  - cargo test --verbose --release --features "trace"
+  - cargo test --verbose --features="volatile_fallback"
+  - cargo test --verbose --release --features="volatile_fallback"
+  - cargo test --verbose --features "volatile_fallback,trace"
+  - cargo test --verbose --release --features "volatile_fallback,trace"
