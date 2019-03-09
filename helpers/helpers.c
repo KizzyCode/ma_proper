@@ -26,7 +26,10 @@
 /// \param allocated The allocated bytes
 /// \param alignment The alignment
 void trace(char prefix, uint8_t const* ptr, size_t requested, size_t allocated, size_t alignment) {
-	fprintf(stderr, "%c %p  [%ld => %ld @%ld]\n", prefix, (void const*)ptr, requested, allocated, alignment);
+	fprintf(
+		stderr, "%c %p  [%ld => %ld @%ld]\n", prefix, (void const*)ptr,
+		(unsigned long)requested, (unsigned long)allocated, (unsigned long)alignment
+	);
 }
 
 
