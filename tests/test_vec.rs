@@ -9,7 +9,7 @@ static GLOBAL: MAProper = MAProper;
 /// Compute the metadata for a length
 fn make_metadata(len: usize) -> [u8; 16] {
 	// Compute CRC
-	let crc: u64 = !len.to_be_bytes().iter().fold(0xFFFFFFFFFFFFFFFFu64, |crc, b| {
+	let crc: u64 = !len.to_ne_bytes().iter().fold(0xFFFFFFFFFFFFFFFFu64, |crc, b| {
 		(0..8).fold(crc ^ *b as u64, |crc, _| {
 			let mask = (!(crc & 1)).overflowing_add(1).0;
 			(crc >> 1) ^ (0xC96C5795D7870F42 & mask)
@@ -18,8 +18,8 @@ fn make_metadata(len: usize) -> [u8; 16] {
 	
 	// Create metadata
 	let mut metadata = [0u8; 16];
-	metadata[..mem::size_of::<usize>()].copy_from_slice(&len.to_be_bytes());
-	metadata[8..].copy_from_slice(&crc.to_be_bytes());
+	metadata[..mem::size_of::<usize>()].copy_from_slice(&len.to_ne_bytes());
+	metadata[8..].copy_from_slice(&crc.to_ne_bytes());
 	
 	metadata
 }

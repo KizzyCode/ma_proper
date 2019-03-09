@@ -61,7 +61,7 @@ impl Metadata {
 	pub fn crc64(data: &[u8]) -> u64 {
 		!data.iter().fold(0xFFFFFFFFFFFFFFFFu64, |crc, b| {
 			(0..8).fold(crc ^ *b as u64, |crc, _| {
-				let mask = (!(crc & 1)).overflowing_add(1).0;
+				let mask = (!(crc & 1)).wrapping_add(1);
 				(crc >> 1) ^ (0xC96C5795D7870F42 & mask)
 			})
 		})
@@ -80,8 +80,8 @@ impl Metadata {
 	/// Creates the metadata for `allocated` and writes it to `ptr`
 	pub unsafe fn write(ptr: *mut u8, allocated: usize) {
 		// Compute CRC-64
-		let len: [u8; USIZE_LEN] = allocated.to_be_bytes();
-		let crc64: [u8; 8] = Self::crc64(&len).to_be_bytes();
+		let len: [u8; USIZE_LEN] = allocated.to_ne_bytes();
+		let crc64: [u8; 8] = Self::crc64(&len).to_ne_bytes();
 		
 		// Zero the memory and copy the length and CRC
 		erase_ptr(ptr, META_LEN);
@@ -99,8 +99,8 @@ impl Metadata {
 		let mut crc64 = [0u8; 8];
 		ptr::copy(ptr.add(META_LEN - 8), crc64.as_mut_ptr(), 8);
 		
-		if Self::crc64(&len) != u64::from_be_bytes(crc64) { None }
-			else { Some(usize::from_be_bytes(len)) }
+		if Self::crc64(&len) != u64::from_ne_bytes(crc64) { None }
+			else { Some(usize::from_ne_bytes(len)) }
 	}
 }
 
