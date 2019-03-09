@@ -41,7 +41,7 @@ impl TestVector {
 		assert_eq!(metadata, expected);
 		
 		// Overwrite the entire string
-		ma_proper::erase(unsafe{ self.0.as_bytes_mut() });
+		ma_proper::erase_slice(unsafe{ self.0.as_bytes_mut() });
 	}
 }
 

@@ -207,11 +207,10 @@ unsafe impl GlobalAlloc for MAProper {
 
 
 /// Erases a byte slice
-pub fn erase<T>(slice: &mut[T]) {
-	unsafe{ erase_ptr(slice.as_mut_ptr(), slice.len()) }
+pub fn erase_slice(mut s: impl AsMut<[u8]>) {
+	let s = s.as_mut();
+	unsafe{ erase_ptr(s.as_mut_ptr(), s.len()) }
 }
-
-
 /// Erases `element_count` elements of type `T` referenced by `ptr`
 pub unsafe fn erase_ptr<T>(ptr: *mut T, element_count: usize) {
 	// Create the `u8` pointer and compute it's length

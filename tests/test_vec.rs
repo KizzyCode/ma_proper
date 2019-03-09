@@ -43,7 +43,7 @@ impl<T> TestVector<T> {
 		assert_eq!(metadata, expected);
 		
 		// Overwrite the entire vector
-		ma_proper::erase(self.0.as_mut_slice());
+		unsafe{ ma_proper::erase_ptr(self.0.as_mut_ptr(), self.0.len()) }
 	}
 }
 
