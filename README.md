@@ -5,7 +5,7 @@
 
 
 # MAProper
-This crate provides the securely erasing memory allocator `MAProper` 🧹
+This crate provides the securely overwriting memory allocator `MAProper` 🧹
 
 
 ## What is `MAProper`

@@ -1,9 +1,11 @@
-//! This crate provides the cleaning memory allocator `MAProper`.
+//! This crate provides the securely overwriting memory allocator `MAProper` 🧹
+//!
 //!
 //! ## What is `MAProper`
 //! `MAProper` is an extension around `std::alloc::System` which ensures that the allocated memory
 //! is always erased before it is deallocated by using one of
 //! `memset_s`/`SecureZeroMemory`/`explicit_bzero`/`explicit_memset`.
+//!
 //!
 //! ## Whats the purpose of `MAProper`
 //! `MAProper` becomes handy if you're dealing with a lot of sensitive data: because the memory
@@ -13,6 +15,7 @@
 //! However they all use the global allocator – so all ways lead to Rome (or in this case to the
 //! global allocator's `alloc` and `dealloc` functions) – which is where `MAProper` is sitting and
 //! waiting to take care of the discarded memory.
+//!
 //!
 //! ## Using `MAProper` as global allocator (example)
 //! ```
@@ -27,17 +30,17 @@
 //! }
 //! ```
 //!
-//! ## Important
 //! Please note that `MAProper` only erases memory that is deallocated properly. This especially
 //! means that:
-//!  - stack items are __not overwritten__ by this allocator (therefore we expose `MAProper::erase`
-//!    or `MAProper::erase_ptr<T>` so that you can erase them manually if necessary)
+//!  - stack items are __not overwritten__ by this allocator – to erase stack memory, we expose
+//!    `MAProper::erase_slice` and `MAProper::erase_ptr<T>` so that you can erase them manually if
+//!    necessary
 //!  - depending on your panic-policy and your `Rc`/`Arc` use (retain-cycles), the destructor (and
 //!    thus the deallocator) may never be called
 //!
-//! ## ⚠️ Alpha-Warning ⚠️
-//! This crate is in an early alpha state; so be careful and don't rely on it if you haven't checked
-//! it by yourself!
+//!
+//! ## ⚠️ Beta-Warning ⚠️
+//! This crate is in an beta state; so be careful if you use it!
 
 use std::{ mem, ptr, os::raw::c_char, alloc::{ GlobalAlloc, System, Layout, handle_alloc_error } };
 
@@ -144,10 +147,11 @@ impl Metadata {
 /// Then we deallocate it.
 ///
 /// ## Important
-/// Please note that this allocator only erases memory that is deallocated properly. This especially
+/// Please note that `MAProper` only erases memory that is deallocated properly. This especially
 /// means that:
-///  - stack items are __not overwritten__ by this allocator (you have to call `MAProper::erase` or
-///    `MAProper::erase_ptr<T>` manually if those items contain sensitive data)
+///  - stack items are __not overwritten__ by this allocator – to erase stack memory, we expose
+///    `MAProper::erase_slice` and `MAProper::erase_ptr<T>` so that you can erase them manually if
+///    necessary
 ///  - depending on your panic-policy and your `Rc`/`Arc` use (retain-cycles), the destructor (and
 ///    thus the deallocator) may never be called
 pub struct MAProper;

@@ -1,11 +1,11 @@
 [package]
 edition = "2018"
 name = "ma_proper"
-version = "0.1.3"
+version = "0.1.4"
 authors = ["Keziah Biermann <development@kizzycode.de>"]
-description = "This crate provides the cleaning memory allocator `MAProper`"
+description = "A securely overwriting memory allocator"
 categories = ["memory-management", "cryptography"]
-keywords = ["allocator", "security", "safe", "cryptography", "memset_s"]
+keywords = ["memory-allocator", "malloc", "cryptography", "memset_s"]
 license = "BSD-2-Clause OR MIT"
 repository = "https://github.com/KizzyCode/ma_proper"
 readme = "README.md"
