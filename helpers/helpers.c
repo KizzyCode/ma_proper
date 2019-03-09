@@ -58,7 +58,7 @@ void ma_proper_memzero(uint8_t* const ptr, const size_t len) {
 	#elif defined(USE_VOLATILE_POINTERS)
 		#warning "No secure memset implementation known; using volatile poiners"
 		volatile uint8_t* volatile ptr_ = (volatile uint8_t* volatile)ptr;
-		for (size_t i = 0; i < len; i++) ptr_[i] = 0x00;
+		size_t i; for (i = 0; i < len; i++) ptr_[i] = 0x00;
 	#else
 		#error "No secure memset implementation specified (this is a build-system error)"
 	#endif
