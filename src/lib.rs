@@ -32,17 +32,16 @@
 //!
 //! Please note that `MAProper` only erases memory that is deallocated properly. This especially
 //! means that:
-//!  - stack items are __not overwritten__ by this allocator – to erase stack memory, we expose
+//!  - stack items are __not erased__ by this allocator – to erase stack memory, we expose
 //!    `MAProper::erase_slice` and `MAProper::erase_ptr<T>` so that you can erase them manually if
 //!    necessary
 //!  - depending on your panic-policy and your `Rc`/`Arc` use (retain-cycles), the destructor (and
 //!    thus the deallocator) may never be called
-//!
-//!
-//! ## ⚠️ Beta-Warning ⚠️
-//! This crate is in an beta state; so be careful if you use it!
 
-use std::{ mem, ptr, os::raw::c_char, alloc::{ GlobalAlloc, System, Layout, handle_alloc_error } };
+use std::{
+	mem, ptr, os::raw::c_char,
+	alloc::{ GlobalAlloc, System, Layout, handle_alloc_error }
+};
 
 
 // Validate that the `usize` byte length is supported
@@ -73,11 +72,15 @@ impl Metadata {
 	/// Returns the metadata-length necessary to maintain the alignment
 	pub fn aligned_len(layout: Layout) -> Option<usize> {
 		// Validate the alignment
-		if !layout.align().is_power_of_two() { return None }
+		if !layout.align().is_power_of_two() {
+			return None
+		}
 		
 		// Compute the meta-length necessary to maintain the alignment
-		if layout.align() < META_LEN { Some(META_LEN) }
-			else { Some(layout.align()) }
+		match layout.align() {
+			align if align < META_LEN => Some(META_LEN),
+			align => Some(align)
+		}
 	}
 	
 	/// Creates the metadata for `allocated` and writes it to `ptr`
@@ -102,8 +105,10 @@ impl Metadata {
 		let mut crc64 = [0u8; 8];
 		ptr::copy(ptr.add(META_LEN - 8), crc64.as_mut_ptr(), 8);
 		
-		if Self::crc64(&len) != u64::from_ne_bytes(crc64) { None }
-			else { Some(usize::from_ne_bytes(len)) }
+		match Self::crc64(&len) == u64::from_ne_bytes(crc64) {
+			true => Some(usize::from_ne_bytes(len)),
+			false => None
+		}
 	}
 }
 
@@ -163,7 +168,7 @@ unsafe impl GlobalAlloc for MAProper {
 		// Precompute the meta length
 		let meta_len = match Metadata::aligned_len(layout) {
 			Some(meta_len) => meta_len,
-			None => die(b"Invalid layout\0")
+			None => die(b"ma_proper: Invalid layout\0")
 		};
 		
 		// Allocate and zero memory
@@ -175,10 +180,7 @@ unsafe impl GlobalAlloc for MAProper {
 		
 		// Write the metadata and return the usable pointer
 		Metadata::write(ptr, to_allocate);
-		trace(
-			'+', ptr,
-			layout.size(), to_allocate, layout.align()
-		);
+		trace('+', ptr, layout.size(), to_allocate, layout.align());
 		ptr.add(meta_len)
 	}
 	
@@ -186,26 +188,23 @@ unsafe impl GlobalAlloc for MAProper {
 		// Precompute the meta length and decrement the pointer
 		let meta_len = match Metadata::aligned_len(layout) {
 			Some(meta_len) => meta_len,
-			None => die(b"Invalid layout\0")
+			None => die(b"ma_proper: Invalid layout\0")
 		};
 		ptr = ptr.sub(meta_len);
 		
 		// Read the allocate length and erase the pointer
 		let allocated = match Metadata::read(ptr) {
 			Some(allocated) => allocated,
-			None => die(b"Invalid CRC for metadata\0")
+			None => die(b"ma_proper: Invalid CRC for metadata\0")
 		};
 		erase_ptr(ptr, allocated);
 		
 		// Free the pointer
 		match Layout::from_size_align(allocated, layout.align()) {
 			Ok(layout) => GlobalAlloc::dealloc(&System, ptr, layout),
-			Err(_) => die(b"Invalid layout\0")
+			Err(_) => die(b"ma_proper: Invalid layout\0")
 		};
-		trace(
-			'-', ptr,
-			layout.size(), allocated, layout.align()
-		);
+		trace('-', ptr, layout.size(), allocated, layout.align());
 	}
 }
 

@@ -24,6 +24,7 @@ fn main() {
 	let mut secure_memset = None;
 	
 	#[cfg(target_os = "macos")] { secure_memset = Some("USE_MEMSET_S") }
+	#[cfg(target_os = "ios")] { secure_memset = Some("USE_MEMSET_S") }
 	#[cfg(target_os = "windows")] { secure_memset = Some("USE_SECUREZEROMEMORY") }
 	#[cfg(target_os = "freebsd")] { secure_memset = Some("USE_EXPLICIT_BZERO") }
 	#[cfg(target_os = "openbsd")] { secure_memset = Some("USE_EXPLICIT_BZERO") }

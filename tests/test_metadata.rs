@@ -97,6 +97,6 @@ fn test_ok() {
 
 
 #[test] #[ignore]
-fn test_err() {
+fn test_abort() {
 	TestVectorErr{ size: 67_108_879, align: 64 }.test();
 }
